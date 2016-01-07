@@ -16,6 +16,7 @@ module React
           super
         end
       else
+        const_set(name, name)
         libraries.each do |library|
           native_name = "#{library}.#{name}"
           native_component = `eval(#{native_name})` rescue nil
@@ -34,8 +35,10 @@ module React
       unless name = const_get(name)
         return super
       end
-      React::RenderingContext.build_or_render(node_only, name, *args, &block)
-    rescue
+      define_singleton_method name do |*a, &b|
+        React::RenderingContext.build_or_render(node_only, name, *a, &b)
+      end
+      send(name, *args, &block)
     end
 
     def self.imports(library)
